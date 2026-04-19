@@ -1,0 +1,16 @@
+{
+  "India": {
+    "country_port": 5000,
+    "banks": {
+      "SBI": 5001,
+      "HDFC": 5002
+    }
+  },
+  "USA": {
+    "country_port": 6000,
+    "banks": {
+      "JPMC": 6001,
+      "BOA": 6002
+    }
+  }
+}

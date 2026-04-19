@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GlobalBank — Project Structure</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:#C9A84C; --gold-l:#E8C96A; --gold-d:#8B6914;
+  --navy:#0A1628; --card:#0D1E3A; --mid:#0F2040;
+  --w:#F4F0E8; --wd:#B8B0A0;
+  --green:#2ECC88; --red:#E74C6A; --blue:#4A9EFF; --purple:#9B6EFF;
+  --border:rgba(201,168,76,.2);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;
+  background:linear-gradient(160deg,#050D1A 0%,#0A1628 50%,#0D2040 100%);
+  background-attachment:fixed; color:var(--w); min-height:100vh; padding:3rem 1.5rem}
+.page{max-width:1000px;margin:0 auto}
+
+/* ── hero ── */
+.hero{text-align:center;margin-bottom:3.5rem}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3rem);
+  background:linear-gradient(135deg,var(--gold-l),var(--gold),var(--gold-d));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.4rem}
+.hero sub{color:var(--wd);font-size:.85rem;letter-spacing:.05em}
+.tags{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:1rem}
+.tag{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.08em;
+  padding:.25rem .75rem;border-radius:20px;border:1px solid}
+.tag.g{border-color:var(--gold);color:var(--gold-l);background:rgba(201,168,76,.08)}
+.tag.gr{border-color:var(--green);color:var(--green);background:rgba(46,204,136,.08)}
+.tag.b{border-color:var(--blue);color:var(--blue);background:rgba(74,158,255,.08)}
+.tag.p{border-color:var(--purple);color:var(--purple);background:rgba(155,110,255,.08)}
+
+/* ── section ── */
+.sec{margin-bottom:2.8rem}
+.sh{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--gold-l);
+  margin-bottom:1.1rem;display:flex;align-items:center;gap:.6rem}
+.sh::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── tree ── */
+.tree{background:rgba(5,13,26,.9);border:1px solid var(--border);border-radius:16px;
+  padding:1.8rem 2rem;font-family:'DM Mono',monospace;font-size:.78rem;line-height:2.1;
+  box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.t0{padding-left:0} .t1{padding-left:1.5rem} .t2{padding-left:3rem}
+.t3{padding-left:4.5rem} .t4{padding-left:6rem}
+.d{color:var(--gold-l)} .py{color:#7FD4FF} .jn{color:var(--green)}
+.ht{color:#FF9B6A} .sq{color:var(--purple)} .tr{color:rgba(201,168,76,.3)}
+.cm{color:rgba(255,255,255,.28);font-size:.7rem}
+
+/* ── port cards ── */
+.ports{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.9rem}
+.pc{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:1rem 1.2rem;transition:transform .2s,border-color .2s}
+.pc:hover{transform:translateY(-3px);border-color:var(--gold)}
+.pc-lbl{font-size:.62rem;color:var(--wd);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.25rem}
+.pc-name{font-family:'Playfair Display',serif;font-size:1rem}
+.pc-num{font-family:'DM Mono',monospace;font-size:1.25rem;color:var(--gold-l);font-weight:500}
+.pc-note{font-size:.62rem;color:var(--wd);margin-top:.3rem}
+
+/* ── file table ── */
+.ftab{width:100%;border-collapse:collapse;background:rgba(5,13,26,.9);
+  border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.ftab th{text-align:left;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--wd);padding:.55rem .9rem;border-bottom:1px solid var(--border)}
+.ftab td{padding:.6rem .9rem;border-bottom:1px solid rgba(255,255,255,.04);
+  font-size:.78rem;vertical-align:top}
+.ftab tr:last-child td{border-bottom:none}
+.ftab tr:hover td{background:rgba(201,168,76,.03)}
+.fn{font-family:'DM Mono',monospace;font-size:.7rem;white-space:nowrap;color:var(--gold-l)}
+.fd{color:var(--wd);line-height:1.55}
+.badge{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.07em;
+  padding:.15rem .45rem;border-radius:4px;border:1px solid;white-space:nowrap}
+.bg{border-color:var(--gold);color:var(--gold-l);background:rgba(201,168,76,.08)}
+.bb{border-color:var(--blue);color:var(--blue);background:rgba(74,158,255,.08)}
+.bgr{border-color:var(--green);color:var(--green);background:rgba(46,204,136,.08)}
+.bp{border-color:var(--purple);color:var(--purple);background:rgba(155,110,255,.08)}
+
+/* ── feature box ── */
+.fbox{background:rgba(46,204,136,.06);border:1px solid rgba(46,204,136,.22);
+  border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.4rem}
+.fbox h4{color:var(--green);font-size:.84rem;margin-bottom:.35rem}
+.fbox p{font-size:.8rem;color:var(--wd);line-height:1.65}
+
+/* ── steps ── */
+.steps{display:flex;flex-direction:column;gap:.85rem}
+.step{display:grid;grid-template-columns:32px 1fr;gap:1rem;align-items:start;
+  background:rgba(13,30,58,.6);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem}
+.sn{width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-l),var(--gold));
+  color:var(--navy);font-family:'DM Mono',monospace;font-size:.72rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step h4{font-size:.87rem;margin-bottom:.25rem}
+.step p{font-size:.79rem;color:var(--wd);line-height:1.6}
+code{font-family:'DM Mono',monospace;font-size:.72rem;
+  background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);
+  border-radius:4px;padding:.05rem .35rem;color:var(--gold-l)}
+pre.cmd{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.07);
+  border-radius:8px;padding:.7rem 1rem;font-family:'DM Mono',monospace;
+  font-size:.72rem;color:#7FFFD4;margin-top:.5rem;white-space:pre;overflow-x:auto}
+
+/* ── rules ── */
+.rules{display:flex;flex-direction:column;gap:.75rem}
+.rule{display:grid;grid-template-columns:auto 1fr;gap:.9rem;align-items:start;
+  background:rgba(13,30,58,.6);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem}
+.rn{font-family:'DM Mono',monospace;font-size:.72rem;font-weight:700;color:var(--gold);
+  background:rgba(201,168,76,.1);border:1px solid var(--border);border-radius:6px;
+  padding:.15rem .5rem;white-space:nowrap}
+.rt{font-size:.84rem;line-height:1.65}
+.rt strong{color:var(--gold-l)}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HERO -->
+<div class="hero">
+  <div style="font-size:3rem;margin-bottom:.4rem">🌐</div>
+  <h1>GlobalBank Distributed System</h1>
+  <sub>Project Structure · Architecture · Setup Reference</sub>
+  <div class="tags">
+    <span class="tag g">Two-Phase Commit</span>
+    <span class="tag gr">FIFO Queue</span>
+    <span class="tag b">Crash Recovery</span>
+    <span class="tag p">Tailscale Ready</span>
+  </div>
+</div>
+
+<!-- FILE TREE -->
+<div class="sec">
+  <div class="sh">📁 Complete File Structure — 29 files</div>
+  <div class="tree">
+<div class="t0"><span class="d">GlobalBank/</span></div>
+<div class="t1"><span class="tr">├── </span><span class="sq">migration.sql</span> <span class="cm">← run once on each Supabase DB before first start</span></div>
+<div class="t1"><span class="tr">├── </span><span class="ht">project_structure.html</span> <span class="cm">← this file</span></div>
+
+<div class="t1 d" style="margin-top:.4rem"><span class="tr">├── </span>frontend/ <span class="cm" style="font-family:'DM Sans',sans-serif">← run on PC-1 (browser machine)</span></div>
+<div class="t2"><span class="tr">├── </span><span class="py">app.py</span> <span class="cm">← Flask: serves UI · proxies API · /bank_config endpoint</span></div>
+<div class="t2"><span class="tr">└── </span><span class="d">templates/</span></div>
+<div class="t3"><span class="tr">└── </span><span class="ht">index.html</span> <span class="cm">← full banking UI (Jinja2 template)</span></div>
+
+<div class="t1 d" style="margin-top:.4rem"><span class="tr">└── </span>Server/ <span class="cm" style="font-family:'DM Sans',sans-serif">← run on PC-2 (server machine)</span></div>
+<div class="t2"><span class="tr">├── </span><span class="jn">config.json</span> <span class="cm">← ✏ EDIT THIS: set tailscale_ip to PC-2 Tailscale IP</span></div>
+<div class="t2"><span class="tr">├── </span><span class="py">config_loader.py</span> <span class="cm">← shared: imported by all 7 servers, reads config.json</span></div>
+<div class="t2"><span class="tr">├── </span><span class="jn">supabase.json</span> <span class="cm">← all 4 DB credentials (read by /bank_config, never sent to browser)</span></div>
+<div class="t2"><span class="tr">├── </span><span class="jn">world_directory.json</span> <span class="cm">← bank→country→port routing map</span></div>
+
+<div class="t2 d" style="margin-top:.4rem"><span class="tr">├── </span>world_server/ <span class="cm" style="font-family:'DM Sans',sans-serif">port 4000</span></div>
+<div class="t3"><span class="tr">├── </span><span class="py">world.py</span></div>
+<div class="t3"><span class="tr">├── </span><span class="py">world_recovery.py</span></div>
+<div class="t3"><span class="tr">└── </span><span class="jn">world_log.json</span></div>
+
+<div class="t2 d" style="margin-top:.4rem"><span class="tr">├── </span>India/ <span class="cm" style="font-family:'DM Sans',sans-serif">port 5000</span></div>
+<div class="t3"><span class="tr">├── </span><span class="py">india.py</span></div>
+<div class="t3"><span class="tr">├── </span><span class="py">india_recovery.py</span></div>
+<div class="t3"><span class="tr">├── </span><span class="jn">india_registry.json</span></div>
+<div class="t3 d"><span class="tr">├── </span>SBI/ <span class="cm" style="font-family:'DM Sans',sans-serif">port 5001</span></div>
+<div class="t4"><span class="tr">├── </span><span class="py">sbi.py</span></div>
+<div class="t4"><span class="tr">├── </span><span class="py">sbi_recovery.py</span></div>
+<div class="t4"><span class="tr">└── </span><span class="jn">bank_log.json</span></div>
+<div class="t3 d"><span class="tr">└── </span>HDFC/ <span class="cm" style="font-family:'DM Sans',sans-serif">port 5002</span></div>
+<div class="t4"><span class="tr">├── </span><span class="py">hdfc.py</span></div>
+<div class="t4"><span class="tr">├── </span><span class="py">hdfc_recovery.py</span></div>
+<div class="t4"><span class="tr">└── </span><span class="jn">bank_log.json</span></div>
+
+<div class="t2 d" style="margin-top:.4rem"><span class="tr">└── </span>USA/ <span class="cm" style="font-family:'DM Sans',sans-serif">port 6000</span></div>
+<div class="t3"><span class="tr">├── </span><span class="py">usa.py</span></div>
+<div class="t3"><span class="tr">├── </span><span class="py">usa_recovery.py</span></div>
+<div class="t3"><span class="tr">├── </span><span class="jn">usa_registry.json</span></div>
+<div class="t3 d"><span class="tr">├── </span>JPMC/ <span class="cm" style="font-family:'DM Sans',sans-serif">port 6001</span></div>
+<div class="t4"><span class="tr">├── </span><span class="py">jpmc.py</span></div>
+<div class="t4"><span class="tr">├── </span><span class="py">jpmc_recovery.py</span></div>
+<div class="t4"><span class="tr">└── </span><span class="jn">bank_log.json</span></div>
+<div class="t3 d"><span class="tr">└── </span>BOA/ <span class="cm" style="font-family:'DM Sans',sans-serif">port 6002</span></div>
+<div class="t4"><span class="tr">├── </span><span class="py">boa.py</span></div>
+<div class="t4"><span class="tr">├── </span><span class="py">boa_recovery.py</span></div>
+<div class="t4"><span class="tr">└── </span><span class="jn">bank_log.json</span></div>
+  </div>
+</div>
+
+<!-- PORT MAP -->
+<div class="sec">
+  <div class="sh">🔌 Port Map</div>
+  <div class="ports">
+    <div class="pc"><div class="pc-lbl">Global Layer</div><div class="pc-name">World</div><div class="pc-num">4000</div><div class="pc-note">Validates cross-country transfers</div></div>
+    <div class="pc"><div class="pc-lbl">Country — India</div><div class="pc-name">India</div><div class="pc-num">5000</div><div class="pc-note">Routes SBI ↔ HDFC</div></div>
+    <div class="pc"><div class="pc-lbl">Bank — India</div><div class="pc-name">SBI</div><div class="pc-num">5001</div><div class="pc-note">Card chars 5–8 = <strong>5001</strong></div></div>
+    <div class="pc"><div class="pc-lbl">Bank — India</div><div class="pc-name">HDFC</div><div class="pc-num">5002</div><div class="pc-note">Card chars 5–8 = <strong>5002</strong></div></div>
+    <div class="pc"><div class="pc-lbl">Country — USA</div><div class="pc-name">USA</div><div class="pc-num">6000</div><div class="pc-note">Routes JPMC ↔ BOA</div></div>
+    <div class="pc"><div class="pc-lbl">Bank — USA</div><div class="pc-name">JPMC</div><div class="pc-num">6001</div><div class="pc-note">Card chars 5–8 = <strong>6001</strong></div></div>
+    <div class="pc"><div class="pc-lbl">Bank — USA</div><div class="pc-name">BOA</div><div class="pc-num">6002</div><div class="pc-note">Card chars 5–8 = <strong>6002</strong></div></div>
+    <div class="pc"><div class="pc-lbl">Frontend (PC-1)</div><div class="pc-name">Flask UI</div><div class="pc-num">8080</div><div class="pc-note">Proxy + /bank_config</div></div>
+  </div>
+</div>
+
+<!-- FILE TABLE -->
+<div class="sec">
+  <div class="sh">📄 Every File Explained</div>
+
+  <div class="fbox">
+    <h4>✨ New Feature — Bank Selection Shows Supabase DB Info</h4>
+    <p>
+      When the user opens <em>Open Account</em> and clicks a bank button,
+      <code>selectBank()</code> in <code>index.html</code> calls
+      <code>GET /bank_config/&lt;BANK&gt;</code> on the Flask server.
+      Flask reads <code>Server/supabase.json</code> and returns the
+      <strong>host</strong>, <strong>database</strong>, and <strong>user</strong>
+      for that bank. The <strong>password is never sent to the browser</strong>.
+      A live DB card appears in the signup form so the user can see which
+      Supabase project their account will be stored in.
+    </p>
+  </div>
+
+  <table class="ftab">
+    <thead><tr><th>File</th><th>Layer</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td class="fn">Server/config.json</td><td><span class="badge bg">Config</span></td><td class="fd">The <strong>one file to edit</strong>. Set <code>tailscale_ip</code> to PC-2's Tailscale IP (<code>tailscale ip -4</code>). Read by every server via config_loader.py.</td></tr>
+      <tr><td class="fn">Server/config_loader.py</td><td><span class="badge bg">Config</span></td><td class="fd">Shared helper imported by all 7 servers. Reads config.json. Builds URL lists: Tailscale IP first, <code>127.0.0.1</code> as fallback. Zero hardcoded IPs anywhere else.</td></tr>
+      <tr><td class="fn">Server/supabase.json</td><td><span class="badge bg">Config</span></td><td class="fd">All 4 banks' Supabase credentials. Read by <code>app.py /bank_config</code>. Password never forwarded to browser.</td></tr>
+      <tr><td class="fn">Server/world_directory.json</td><td><span class="badge bg">Config</span></td><td class="fd">Global bank → country → port routing map. Used by country servers to resolve receiver bank location.</td></tr>
+      <tr><td class="fn">world.py</td><td><span class="badge bg">World :4000</span></td><td class="fd">Health-monitors countries every 5 s. Validates cross-country transfers (both country + receiver bank online?). Never touches money.</td></tr>
+      <tr><td class="fn">world_recovery.py</td><td><span class="badge bg">World :4000</span></td><td class="fd">Resets all country statuses to OFF in world_log.json. Removes stuck transaction records. Health monitor re-discovers on startup.</td></tr>
+      <tr><td class="fn">world_log.json</td><td><span class="badge bg">World :4000</span></td><td class="fd">Persists country ON/OFF status between restarts.</td></tr>
+      <tr><td class="fn">india.py / usa.py</td><td><span class="badge bb">Country</span></td><td class="fd">Health-monitors local banks every 5 s. Routes same-country transfers (ACK only — 2PC is the bank's job). Forwards cross-country requests to World.</td></tr>
+      <tr><td class="fn">india_recovery.py / usa_recovery.py</td><td><span class="badge bb">Country</span></td><td class="fd">Resets all bank statuses to OFF in registry JSON so health monitor starts fresh.</td></tr>
+      <tr><td class="fn">india_registry.json / usa_registry.json</td><td><span class="badge bb">Country</span></td><td class="fd">Live map of bank name → port + status + fail_count. Written by health monitor every 5 s.</td></tr>
+      <tr><td class="fn">sbi.py / hdfc.py / jpmc.py / boa.py</td><td><span class="badge bgr">Bank</span></td><td class="fd">All transaction logic: bcrypt signup/login, PIN-gated balance, FIFO deposit/withdraw, full 2PC transfer. Exposes <code>/receive_prepare</code>, <code>/receive_commit</code>, <code>/receive_abort</code> for cross-bank coordination.</td></tr>
+      <tr><td class="fn">sbi_recovery.py … boa_recovery.py</td><td><span class="badge bgr">Bank</span></td><td class="fd">Refunds PREPARED senders + ABORT. Aborts PREPARED receivers. Resets PROCESSING queue rows → PENDING for FIFO re-processing.</td></tr>
+      <tr><td class="fn">bank_log.json (×4)</td><td><span class="badge bgr">Bank</span></td><td class="fd">Bank name, port, and Supabase connection credentials. Read on every DB connect call. Each bank has its own file.</td></tr>
+      <tr><td class="fn">frontend/app.py</td><td><span class="badge bp">Frontend</span></td><td class="fd">Flask server on PC-1. Serves index.html. <code>/config</code> → port map. <code>/bank_config/&lt;BANK&gt;</code> → Supabase DB info (no password). <code>/proxy/&lt;port&gt;/&lt;path&gt;</code> → reverse-proxy to PC-2. Zero CORS issues.</td></tr>
+      <tr><td class="fn">frontend/templates/index.html</td><td><span class="badge bp">Frontend</span></td><td class="fd">Full banking UI. Login, signup (with live DB info card on bank select), balance, deposit, withdraw, send money with 2PC animation, server log panel.</td></tr>
+      <tr><td class="fn">migration.sql</td><td><span class="badge bp">DB</span></td><td class="fd">Adds <code>bank</code> column to tx_requests table + performance indexes. Run once per Supabase instance (SBI, HDFC, JPMC, BOA).</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SETUP -->
+<div class="sec">
+  <div class="sh">🚀 Setup Order</div>
+  <div class="steps">
+    <div class="step">
+      <div class="sn">1</div>
+      <div>
+        <h4>Edit <code>Server/config.json</code> — set your Tailscale IP</h4>
+        <p>On PC-2 run <code>tailscale ip -4</code> to get your Tailscale IP, then paste it into <code>tailscale_ip</code>. This is the <strong>only file you ever need to edit</strong> to configure networking.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="sn">2</div>
+      <div>
+        <h4>Run <code>migration.sql</code> on each Supabase project</h4>
+        <p>Open each of the 4 Supabase projects → SQL Editor → paste and run migration.sql. Do this for SBI, HDFC, JPMC, and BOA separately.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="sn">3</div>
+      <div>
+        <h4>Install dependencies on PC-2</h4>
+        <pre class="cmd">pip install flask psycopg2-binary requests bcrypt</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="sn">4</div>
+      <div>
+        <h4>Start all servers on PC-2 (in this order)</h4>
+        <pre class="cmd">cd Server/world_server  &&  python world.py
+cd Server/India         &&  python india.py
+cd Server/USA           &&  python usa.py
+cd Server/India/SBI     &&  python sbi.py
+cd Server/India/HDFC    &&  python hdfc.py
+cd Server/USA/JPMC      &&  python jpmc.py
+cd Server/USA/BOA       &&  python boa.py</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="sn">5</div>
+      <div>
+        <h4>Start the frontend on PC-1</h4>
+        <pre class="cmd">pip install flask requests
+cd frontend
+python app.py --server-ip &lt;PC-2 Tailscale IP&gt;</pre>
+        <p>Then open <code>http://localhost:8080</code> in your browser.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GUARANTEES -->
+<div class="sec">
+  <div class="sh">⚖ System Guarantees</div>
+  <div class="rules">
+    <div class="rule"><span class="rn">R1</span><div class="rt"><strong>Zero CORS.</strong> Browser talks only to <code>localhost:8080</code>. Flask proxies every call to PC-2 via Tailscale. No cross-origin request ever leaves the browser.</div></div>
+    <div class="rule"><span class="rn">R2</span><div class="rt"><strong>One-file IP config.</strong> Edit <code>tailscale_ip</code> in <code>Server/config.json</code> once. All 7 servers read it via <code>config_loader.py</code> — nothing else to change.</div></div>
+    <div class="rule"><span class="rn">R3</span><div class="rt"><strong>Password never leaves the server.</strong> <code>supabase.json</code> is read only by Flask backend. <code>/bank_config</code> returns host/database/user — the password key is deliberately absent from the response.</div></div>
+    <div class="rule"><span class="rn">R4</span><div class="rt"><strong>2PC atomicity.</strong> If receiver PREPARE fails after sender debit → sender is immediately refunded. If receiver COMMIT fails → abort + refund. Money is never lost.</div></div>
+    <div class="rule"><span class="rn">R5</span><div class="rt"><strong>FIFO + deadlock-free.</strong> Deposits and withdrawals use <code>FOR UPDATE SKIP LOCKED</code>. Earlier requests always complete first. Workers never block each other.</div></div>
+    <div class="rule"><span class="rn">R6</span><div class="rt"><strong>Crash recovery.</strong> Every server runs its <code>*_recovery.py</code> on startup. PREPARED senders are refunded. PREPARED receivers are aborted. PROCESSING queue rows are re-queued to PENDING.</div></div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

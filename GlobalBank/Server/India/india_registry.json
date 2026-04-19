@@ -1,0 +1,15 @@
+{
+  "country": "India",
+  "banks": {
+    "SBI": {
+      "port": 5001,
+      "status": "ON",
+      "fail_count": 2
+    },
+    "HDFC": {
+      "port": 5002,
+      "status": "ON",
+      "fail_count": 1
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "bank": "SBI",
+  "port": 5001,
+  "supabase": {
+    "host": "db.jusvttxoulidypfksehx.supabase.co",
+    "port": 5432,
+    "database": "postgres",
+    "user": "postgres",
+    "password": "SBIindia@5001"
+  },
+  "inflight": []
+}

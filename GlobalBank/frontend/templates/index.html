@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GlobalBank — Distributed Banking</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C96A;
+    --gold-dim: #8B6914;
+    --navy: #0A1628;
+    --navy-mid: #0F2040;
+    --navy-light: #162B52;
+    --navy-card: #0D1E3A;
+    --white: #F4F0E8;
+    --white-dim: #B8B0A0;
+    --green: #2ECC88;
+    --red: #E74C6A;
+    --blue: #4A9EFF;
+    --glass: rgba(20, 40, 80, 0.7);
+    --border: rgba(201, 168, 76, 0.25);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND ── */
+  .bg-canvas {
+    position: fixed; inset: 0; z-index: 0;
+    background: 
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(201,168,76,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 90%, rgba(74,158,255,0.06) 0%, transparent 60%),
+      linear-gradient(160deg, #050D1A 0%, #0A1628 40%, #0D2040 100%);
+  }
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0;
+    background-image: 
+      linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  /* ── SCREENS ── */
+  .screen { position: relative; z-index: 1; min-height: 100vh; display: none; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ════════════════════════════════════
+     AUTH SCREEN
+  ════════════════════════════════════ */
+  #auth-screen {
+    align-items: center; justify-content: center; padding: 2rem;
+  }
+
+  .auth-logo {
+    text-align: center; margin-bottom: 3rem;
+    animation: fadeDown 0.8s ease both;
+  }
+  .auth-logo h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem; font-weight: 700;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dim));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: 0.05em;
+  }
+  .auth-logo p {
+    color: var(--white-dim); font-size: 0.85rem; letter-spacing: 0.2em;
+    text-transform: uppercase; margin-top: 0.4rem;
+  }
+  .globe-icon {
+    font-size: 3.5rem; margin-bottom: 0.5rem;
+    animation: spin-slow 20s linear infinite;
+    display: inline-block;
+  }
+
+  .auth-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%; max-width: 420px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(201,168,76,0.15);
+    animation: fadeUp 0.8s ease 0.2s both;
+  }
+
+  .auth-tabs {
+    display: flex; gap: 0.5rem; margin-bottom: 2rem;
+    background: rgba(0,0,0,0.3); border-radius: 12px; padding: 0.4rem;
+  }
+  .auth-tab {
+    flex: 1; padding: 0.7rem; border: none; background: transparent;
+    color: var(--white-dim); font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; font-weight: 500; cursor: pointer; border-radius: 9px;
+    transition: all 0.3s;
+  }
+  .auth-tab.active {
+    background: var(--gold); color: var(--navy);
+    box-shadow: 0 4px 15px rgba(201,168,76,0.4);
+  }
+
+  .bank-selector {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 1.5rem;
+  }
+  .bank-btn {
+    padding: 0.7rem; border: 1px solid var(--border); background: rgba(255,255,255,0.04);
+    border-radius: 10px; cursor: pointer; color: var(--white); font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem; font-weight: 500; transition: all 0.2s;
+    display: flex; align-items: center; gap: 0.5rem; justify-content: center;
+  }
+  .bank-btn:hover { border-color: var(--gold); background: rgba(201,168,76,0.1); }
+  .bank-btn.selected { border-color: var(--gold); background: rgba(201,168,76,0.2); color: var(--gold-light); }
+
+  .field { margin-bottom: 1.2rem; }
+  .field label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--white-dim); display: block; margin-bottom: 0.5rem; }
+  .field input {
+    width: 100%; padding: 0.85rem 1rem;
+    background: rgba(0,0,0,0.3); border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 10px; color: var(--white); font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+  }
+  .field input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
+  .field input::placeholder { color: rgba(255,255,255,0.2); }
+
+  .btn-primary {
+    width: 100%; padding: 0.9rem; border: none;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color: var(--navy); font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem; font-weight: 600; border-radius: 12px;
+    cursor: pointer; transition: all 0.3s; letter-spacing: 0.02em;
+    box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(201,168,76,0.5); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .auth-error {
+    background: rgba(231,76,106,0.15); border: 1px solid rgba(231,76,106,0.3);
+    border-radius: 8px; padding: 0.7rem 1rem; font-size: 0.85rem;
+    color: #ff8a9e; margin-bottom: 1rem; display: none;
+  }
+
+  /* ════════════════════════════════════
+     HOME SCREEN
+  ════════════════════════════════════ */
+  #home-screen { flex-direction: column; }
+
+  /* NAVBAR */
+  .navbar {
+    display: flex; align-items: center; padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(5,13,26,0.9); backdrop-filter: blur(20px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .navbar-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem; font-weight: 700; color: var(--gold);
+    display: flex; align-items: center; gap: 0.5rem;
+    flex: 1;
+  }
+  .navbar-brand .bank-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem; background: rgba(201,168,76,0.15);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 0.15rem 0.4rem; color: var(--gold-light);
+    letter-spacing: 0.1em;
+  }
+  .navbar-actions { display: flex; gap: 0.8rem; align-items: center; }
+
+  .nav-btn {
+    padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--white); font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .nav-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.08); }
+
+  /* MAIN CONTENT */
+  .home-content {
+    flex: 1; padding: 2rem; max-width: 900px; margin: 0 auto; width: 100%;
+  }
+
+  .welcome-bar {
+    margin-bottom: 2rem; animation: fadeUp 0.5s ease both;
+  }
+  .welcome-bar h2 {
+    font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 600;
+  }
+  .welcome-bar p { color: var(--white-dim); font-size: 0.9rem; margin-top: 0.3rem; }
+
+  /* ACTION CARDS */
+  .action-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 2rem;
+  }
+  @media (max-width: 600px) { .action-grid { grid-template-columns: 1fr; } }
+
+  .action-card {
+    background: var(--glass); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.8rem 1.5rem; cursor: pointer;
+    transition: all 0.3s; backdrop-filter: blur(15px);
+    text-align: center; position: relative; overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+  .action-card:nth-child(2) { animation-delay: 0.1s; }
+  .action-card:nth-child(3) { animation-delay: 0.2s; }
+  .action-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(201,168,76,0.06), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .action-card:hover { transform: translateY(-4px); border-color: var(--gold); box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,168,76,0.2); }
+  .action-card:hover::before { opacity: 1; }
+
+  .action-icon { font-size: 2.2rem; margin-bottom: 0.8rem; }
+  .action-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.3rem; }
+  .action-card p { font-size: 0.8rem; color: var(--white-dim); }
+
+  /* ════════════════════════════════════
+     MODAL SYSTEM
+  ════════════════════════════════════ */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(5,13,26,0.85); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--navy-card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 2rem; width: 100%; max-width: 480px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(201,168,76,0.15);
+    transform: translateY(20px) scale(0.97); transition: all 0.3s;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;
+  }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; }
+  .modal-close {
+    width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border);
+    background: transparent; color: var(--white-dim); cursor: pointer; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  }
+  .modal-close:hover { border-color: var(--red); color: var(--red); }
+
+  .btn-secondary {
+    width: 100%; padding: 0.75rem; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.05); color: var(--white);
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+    border-radius: 10px; cursor: pointer; margin-top: 0.8rem; transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ════════════════════════════════════
+     SERVER LOG PANEL
+  ════════════════════════════════════ */
+  .server-panel {
+    position: fixed; right: 0; top: 0; bottom: 0; width: 360px; z-index: 150;
+    background: rgba(5,13,26,0.97); border-left: 1px solid var(--border);
+    backdrop-filter: blur(20px); transform: translateX(100%); transition: transform 0.4s ease;
+    display: flex; flex-direction: column;
+  }
+  .server-panel.open { transform: translateX(0); }
+
+  .panel-header {
+    padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .panel-title { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase; }
+  .panel-close {
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+    background: transparent; color: var(--white-dim); cursor: pointer; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .panel-close:hover { border-color: var(--red); color: var(--red); }
+
+  .log-entries { flex: 1; overflow-y: auto; padding: 1rem; }
+  .log-entry {
+    padding: 0.6rem 0.8rem; border-radius: 8px; margin-bottom: 0.5rem;
+    font-family: 'DM Mono', monospace; font-size: 0.72rem; line-height: 1.5;
+    border-left: 3px solid; animation: slideIn 0.3s ease both;
+  }
+  .log-entry.info { background: rgba(74,158,255,0.08); border-color: var(--blue); color: #90C8FF; }
+  .log-entry.success { background: rgba(46,204,136,0.08); border-color: var(--green); color: #7FFFD4; }
+  .log-entry.error { background: rgba(231,76,106,0.08); border-color: var(--red); color: #FF8A9E; }
+  .log-entry.warn { background: rgba(201,168,76,0.08); border-color: var(--gold); color: var(--gold-light); }
+  .log-entry.step { background: rgba(201,168,76,0.05); border-color: var(--gold-dim); color: var(--white-dim); }
+
+  .log-time { opacity: 0.5; margin-right: 0.5rem; }
+
+  /* ════════════════════════════════════
+     2PC VISUALIZATION
+  ════════════════════════════════════ */
+  .twopc-panel {
+    position: fixed; inset: 0; z-index: 250;
+    background: rgba(5,13,26,0.95); backdrop-filter: blur(12px);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2rem; opacity: 0; pointer-events: none; transition: opacity 0.4s;
+  }
+  .twopc-panel.open { opacity: 1; pointer-events: all; }
+
+  .twopc-title {
+    font-family: 'Playfair Display', serif; font-size: 1.5rem;
+    color: var(--gold); margin-bottom: 0.5rem; text-align: center;
+  }
+  .twopc-subtitle { color: var(--white-dim); font-size: 0.85rem; margin-bottom: 2.5rem; text-align: center; }
+
+  .twopc-diagram {
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 2rem; width: 100%; max-width: 700px;
+  }
+
+  .twopc-node {
+    background: var(--navy-card); border: 2px solid var(--border);
+    border-radius: 14px; padding: 1rem 1.2rem; text-align: center;
+    min-width: 110px; transition: all 0.4s;
+  }
+  .twopc-node.active { border-color: var(--gold); box-shadow: 0 0 20px rgba(201,168,76,0.3); }
+  .twopc-node.success { border-color: var(--green); box-shadow: 0 0 20px rgba(46,204,136,0.3); }
+  .twopc-node.error { border-color: var(--red); box-shadow: 0 0 20px rgba(231,76,106,0.3); }
+  .twopc-node .node-icon { font-size: 1.6rem; margin-bottom: 0.3rem; }
+  .twopc-node .node-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; }
+  .twopc-node .node-status { font-size: 0.65rem; color: var(--white-dim); margin-top: 0.2rem; font-family: 'DM Mono', monospace; }
+
+  .twopc-arrow {
+    display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  }
+  .arrow-line {
+    width: 60px; height: 2px; background: var(--border); position: relative; transition: all 0.4s;
+  }
+  .arrow-line.active { background: var(--gold); box-shadow: 0 0 8px rgba(201,168,76,0.5); }
+  .arrow-line.success { background: var(--green); }
+  .arrow-line::after {
+    content: '▶'; position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+    font-size: 0.6rem; color: inherit;
+  }
+  .arrow-label { font-size: 0.6rem; color: var(--white-dim); font-family: 'DM Mono', monospace; text-align: center; }
+
+  .twopc-steps {
+    width: 100%; max-width: 500px;
+  }
+  .twopc-step {
+    display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 0.8rem;
+    border-radius: 8px; margin-bottom: 0.4rem; font-size: 0.82rem;
+    opacity: 0.3; transition: all 0.4s;
+  }
+  .twopc-step.active { opacity: 1; background: rgba(201,168,76,0.08); }
+  .twopc-step.done { opacity: 0.7; }
+  .twopc-step.done .step-icon { color: var(--green); }
+  .step-num {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700; font-family: 'DM Mono', monospace; flex-shrink: 0;
+  }
+  .twopc-step.active .step-num { background: var(--gold); color: var(--navy); }
+  .twopc-step.done .step-num { background: var(--green); color: var(--navy); }
+
+  /* ════════════════════════════════════
+     DROPDOWN PANELS (Account, Transactions)
+  ════════════════════════════════════ */
+  .dropdown-panel {
+    position: absolute; top: 100%; right: 0; margin-top: 0.5rem;
+    background: var(--navy-card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.2rem; min-width: 280px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6); z-index: 200;
+    display: none; animation: fadeUp 0.2s ease;
+  }
+  .dropdown-panel.open { display: block; }
+  .relative { position: relative; }
+
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .info-label { font-size: 0.75rem; color: var(--white-dim); }
+  .info-val { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--white); }
+
+  .tx-item {
+    padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.8rem;
+  }
+  .tx-item:last-child { border-bottom: none; }
+  .tx-type { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem; }
+  .tx-amount { font-family: 'DM Mono', monospace; font-weight: 600; }
+  .tx-state { font-size: 0.65rem; font-family: 'DM Mono', monospace; }
+  .state-committed { color: var(--green); }
+  .state-aborted { color: var(--red); }
+  .state-prepared { color: var(--gold); }
+
+  /* ════════════════════════════════════
+     SUCCESS OVERLAY
+  ════════════════════════════════════ */
+  .success-overlay {
+    position: fixed; inset: 0; z-index: 300;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(5,13,26,0.9); backdrop-filter: blur(12px);
+    opacity: 0; pointer-events: none; transition: opacity 0.4s;
+  }
+  .success-overlay.open { opacity: 1; pointer-events: all; }
+  .success-card {
+    background: var(--navy-card); border: 1px solid var(--green);
+    border-radius: 20px; padding: 3rem 2.5rem; text-align: center; max-width: 380px;
+    box-shadow: 0 0 60px rgba(46,204,136,0.2);
+    transform: scale(0.8); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .success-overlay.open .success-card { transform: scale(1); }
+  .success-icon { font-size: 4rem; margin-bottom: 1rem; animation: pulse 1s ease infinite; }
+  .success-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--green); margin-bottom: 0.5rem; }
+  .success-detail { color: var(--white-dim); font-size: 0.85rem; font-family: 'DM Mono', monospace; margin-bottom: 1.5rem; }
+
+  /* ════════════════════════════════════
+     SPINNER / LOADING
+  ════════════════════════════════════ */
+  .spinner {
+    width: 18px; height: 18px; border: 2px solid rgba(10,22,40,0.3);
+    border-top-color: var(--navy); border-radius: 50%;
+    animation: spin 0.8s linear infinite; display: inline-block;
+  }
+
+  /* ════════════════════════════════════
+     STATUS BADGE
+  ════════════════════════════════════ */
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+  }
+  .status-badge.on { background: rgba(46,204,136,0.15); color: var(--green); border: 1px solid rgba(46,204,136,0.3); }
+  .status-badge.off { background: rgba(231,76,106,0.15); color: var(--red); border: 1px solid rgba(231,76,106,0.3); }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: pulse 1.5s ease infinite; }
+
+  /* ════════════════════════════════════
+     CARD DISPLAY
+  ════════════════════════════════════ */
+  .bank-card {
+    background: linear-gradient(135deg, var(--navy-light), var(--navy-mid));
+    border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem;
+    position: relative; overflow: hidden; margin-bottom: 1.5rem;
+  }
+  .bank-card::before {
+    content: ''; position: absolute; top: -30%; right: -10%;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%);
+  }
+  .card-number {
+    font-family: 'DM Mono', monospace; font-size: 1.1rem; letter-spacing: 0.15em;
+    color: var(--gold-light); margin-bottom: 0.5rem;
+  }
+  .card-name { font-size: 0.85rem; color: var(--white-dim); }
+  .card-bank-logo {
+    position: absolute; top: 1rem; right: 1rem;
+    font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--gold);
+  }
+
+  /* ════════════════════════════════════
+     ANIMATIONS
+  ════════════════════════════════════ */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes spin-slow { to { transform: rotate(360deg); } }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .shimmer {
+    background: linear-gradient(90deg, transparent 20%, rgba(201,168,76,0.15) 50%, transparent 80%);
+    background-size: 200% auto; animation: shimmer 1.5s linear infinite;
+  }
+
+  /* Pulse ring */
+  .pulse-ring {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+    position: relative;
+  }
+  .pulse-ring::after {
+    content: ''; position: absolute; inset: -4px; border-radius: 50%;
+    border: 2px solid var(--green); animation: pulse-expand 1.5s ease infinite;
+  }
+  @keyframes pulse-expand {
+    from { transform: scale(0.8); opacity: 1; }
+    to { transform: scale(2); opacity: 0; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 2px; }
+
+  /* transfer sub-options */
+  .sub-options { display: flex; gap: 0.8rem; margin-bottom: 1.2rem; }
+  .sub-opt {
+    flex: 1; padding: 0.7rem; border: 1px solid var(--border);
+    border-radius: 10px; background: transparent; color: var(--white);
+    cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    text-align: center; transition: all 0.2s;
+  }
+  .sub-opt:hover, .sub-opt.selected { border-color: var(--gold); background: rgba(201,168,76,0.1); color: var(--gold-light); }
+
+  .card-preview {
+    background: rgba(0,0,0,0.2); border: 1px dashed var(--border);
+    border-radius: 10px; padding: 0.8rem; margin-bottom: 0.8rem;
+    font-family: 'DM Mono', monospace; font-size: 0.78rem; display: none;
+  }
+  .card-preview.visible { display: block; }
+  .card-preview .found { color: var(--green); }
+  .card-preview .notfound { color: var(--white-dim); }
+
+  .amount-display {
+    font-family: 'DM Mono', monospace; font-size: 2rem; text-align: center;
+    color: var(--gold-light); padding: 0.5rem 0; margin: 0.5rem 0;
+  }
+
+  .section-title {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em;
+    color: var(--white-dim); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .section-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-canvas"></div>
+<div class="bg-grid"></div>
+
+<!-- ══════════════════════════════════════════
+     AUTH SCREEN
+══════════════════════════════════════════ -->
+<div id="auth-screen" class="screen active">
+  <div class="auth-logo">
+    <div class="globe-icon">🌐</div>
+    <h1>GlobalBank</h1>
+    <p>Distributed Banking Network · Secured by 2PC</p>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="switchAuthTab('signup')">Open Account</button>
+    </div>
+
+    <div id="auth-error" class="auth-error"></div>
+
+    <!-- LOGIN FORM -->
+    <div id="login-form">
+      <div class="field">
+        <label>Card Number</label>
+        <input id="login-card" type="text" placeholder="e.g. AB3C5001XY7Z" maxlength="12">
+      </div>
+      <div class="field">
+        <label>PIN</label>
+        <input id="login-pin" type="password" placeholder="Enter your PIN">
+      </div>
+      <button class="btn-primary" id="login-btn" onclick="doLogin()">
+        Sign In to Your Account
+      </button>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="signup-form" style="display:none">
+      <div class="section-title">Choose Your Bank</div>
+      <div class="bank-selector" id="bank-selector">
+        <button class="bank-btn" data-bank="SBI" data-port="5001" onclick="selectBank(this)">🏦 SBI <small style="color:var(--white-dim);font-size:0.7rem">India</small></button>
+        <button class="bank-btn" data-bank="HDFC" data-port="5002" onclick="selectBank(this)">🏛 HDFC <small style="color:var(--white-dim);font-size:0.7rem">India</small></button>
+        <button class="bank-btn" data-bank="JPMC" data-port="6001" onclick="selectBank(this)">🗽 JPMC <small style="color:var(--white-dim);font-size:0.7rem">USA</small></button>
+        <button class="bank-btn" data-bank="BOA" data-port="6002" onclick="selectBank(this)">🦅 BOA <small style="color:var(--white-dim);font-size:0.7rem">USA</small></button>
+      </div>
+      <!-- DB info panel — populated by selectBank() calling /bank_config/<bank> -->
+      <div id="bank-db-info" style="display:none;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;margin-bottom:1.2rem"></div>
+      <div class="field">
+        <label>Full Name</label>
+        <input id="signup-name" type="text" placeholder="John Doe">
+      </div>
+      <div class="field">
+        <label>Create PIN (min 4 digits)</label>
+        <input id="signup-pin" type="password" placeholder="Choose a secure PIN">
+      </div>
+      <div class="field">
+        <label>Confirm PIN</label>
+        <input id="signup-pin2" type="password" placeholder="Repeat PIN">
+      </div>
+      <button class="btn-primary" id="signup-btn" onclick="doSignup()">
+        Create Account
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     HOME SCREEN
+══════════════════════════════════════════ -->
+<div id="home-screen" class="screen">
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <span id="nav-bank-name">GlobalBank</span>
+      <span class="bank-badge" id="nav-bank-badge">SBI</span>
+    </div>
+    <div class="navbar-actions">
+      <!-- Server Status -->
+      <button class="nav-btn" onclick="toggleServerPanel()">
+        📡 Server Log
+      </button>
+      <!-- Transactions -->
+      <div class="relative">
+        <button class="nav-btn" id="tx-nav-btn" onclick="toggleTxPanel()">
+          📋 Transactions
+        </button>
+        <div class="dropdown-panel" id="tx-panel">
+          <div style="font-size:0.78rem;color:var(--white-dim);margin-bottom:0.8rem">Recent Transactions</div>
+          <div id="tx-list"><div style="color:var(--white-dim);font-size:0.8rem">Loading...</div></div>
+        </div>
+      </div>
+      <!-- Account -->
+      <div class="relative">
+        <button class="nav-btn" id="acc-nav-btn" onclick="toggleAccPanel()">
+          👤 Account
+        </button>
+        <div class="dropdown-panel" id="acc-panel">
+          <div class="bank-card" id="mini-card">
+            <div class="card-bank-logo" id="mini-bank-logo">SBI</div>
+            <div class="card-number" id="mini-card-number">••••5001••••</div>
+            <div class="card-name" id="mini-card-name">Loading...</div>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Account ID</span>
+            <span class="info-val" id="info-account-id">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Bank</span>
+            <span class="info-val" id="info-bank">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Status</span>
+            <span class="info-val"><span class="status-badge on"><span class="status-dot"></span>ACTIVE</span></span>
+          </div>
+          <button class="btn-secondary" onclick="doLogout()" style="margin-top:0.8rem;color:var(--red);border-color:rgba(231,76,106,0.3)">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="home-content">
+    <div class="welcome-bar">
+      <h2>Good day, <span id="welcome-name">User</span> 👋</h2>
+      <p>Secure distributed banking powered by Two-Phase Commit protocol</p>
+    </div>
+
+    <div class="section-title">What would you like to do?</div>
+    <div class="action-grid">
+      <div class="action-card" onclick="openModal('balance-modal')">
+        <div class="action-icon">💰</div>
+        <h3>Balance</h3>
+        <p>Check your account balance securely</p>
+      </div>
+      <div class="action-card" onclick="openModal('withdraw-modal')">
+        <div class="action-icon">💸</div>
+        <h3>Withdraw</h3>
+        <p>Withdraw funds from your account</p>
+      </div>
+      <div class="action-card" onclick="openDepositModal()">
+        <div class="action-icon">🏧</div>
+        <h3>Deposit / Send</h3>
+        <p>Add money or transfer to any bank</p>
+      </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="section-title">System Status</div>
+    <div id="system-status" style="display:flex;flex-wrap:wrap;gap:0.8rem;margin-bottom:2rem;animation:fadeUp 0.5s ease 0.4s both">
+      <!-- Filled dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════ -->
+
+<!-- BALANCE MODAL -->
+<div class="modal-overlay" id="balance-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💰 Check Balance</div>
+      <button class="modal-close" onclick="closeModal('balance-modal')">✕</button>
+    </div>
+    <p style="color:var(--white-dim);font-size:0.85rem;margin-bottom:1.2rem">Enter your PIN to view balance securely.</p>
+    <div class="field">
+      <label>PIN</label>
+      <input id="bal-pin" type="password" placeholder="Your PIN">
+    </div>
+    <div id="bal-result" style="display:none;text-align:center;padding:1.2rem;background:rgba(46,204,136,0.08);border:1px solid rgba(46,204,136,0.2);border-radius:12px;margin-bottom:1rem">
+      <div style="color:var(--white-dim);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em">Available Balance</div>
+      <div class="amount-display" id="bal-amount">—</div>
+    </div>
+    <button class="btn-primary" onclick="doBalance()">Verify & Check</button>
+  </div>
+</div>
+
+<!-- WITHDRAW MODAL -->
+<div class="modal-overlay" id="withdraw-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💸 Withdraw</div>
+      <button class="modal-close" onclick="closeModal('withdraw-modal')">✕</button>
+    </div>
+    <p style="color:var(--white-dim);font-size:0.85rem;margin-bottom:1.2rem">Funds deducted instantly from your account.</p>
+    <div class="field">
+      <label>Amount</label>
+      <input id="wit-amount" type="number" placeholder="0.00" min="0.01" step="0.01">
+    </div>
+    <div class="field">
+      <label>Confirm PIN</label>
+      <input id="wit-pin" type="password" placeholder="Your PIN">
+    </div>
+    <button class="btn-primary" onclick="doWithdraw()">Withdraw Funds</button>
+  </div>
+</div>
+
+<!-- DEPOSIT MODAL -->
+<div class="modal-overlay" id="deposit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🏧 Deposit / Send Money</div>
+      <button class="modal-close" onclick="closeModal('deposit-modal')">✕</button>
+    </div>
+    <div class="sub-options">
+      <button class="sub-opt selected" id="dep-tab-add" onclick="switchDepTab('add')">➕ Add Money</button>
+      <button class="sub-opt" id="dep-tab-send" onclick="switchDepTab('send')">➡ Send Money</button>
+    </div>
+
+    <!-- ADD MONEY -->
+    <div id="dep-add">
+      <p style="color:var(--white-dim);font-size:0.82rem;margin-bottom:1rem">Add funds to your account.</p>
+      <div class="field">
+        <label>Amount</label>
+        <input id="dep-amount" type="number" placeholder="0.00" min="0.01" step="0.01">
+      </div>
+      <div class="field">
+        <label>Confirm PIN</label>
+        <input id="dep-pin" type="password" placeholder="Your PIN">
+      </div>
+      <button class="btn-primary" onclick="doDeposit()">Add Money</button>
+    </div>
+
+    <!-- SEND MONEY -->
+    <div id="dep-send" style="display:none">
+      <div class="field">
+        <label>Receiver Card Number</label>
+        <input id="send-card" type="text" placeholder="12-character card number" maxlength="12" oninput="onCardInput(this)">
+      </div>
+      <div class="card-preview" id="card-preview"></div>
+      <div class="field">
+        <label>Amount</label>
+        <input id="send-amount" type="number" placeholder="0.00" min="0.01" step="0.01">
+      </div>
+      <div class="field">
+        <label>Your PIN</label>
+        <input id="send-pin" type="password" placeholder="Your PIN">
+      </div>
+      <button class="btn-primary" onclick="doTransfer()">Send via 2PC</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SERVER LOG PANEL
+══════════════════════════════════════════ -->
+<div class="server-panel" id="server-panel">
+  <div class="panel-header">
+    <div class="panel-title">⬡ Server Activity Log</div>
+    <button class="panel-close" onclick="toggleServerPanel()">✕</button>
+  </div>
+  <div class="log-entries" id="log-entries">
+    <div class="log-entry info">
+      <span class="log-time">00:00:00</span>System initialized. Waiting for events...
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     2PC VISUALIZATION PANEL
+══════════════════════════════════════════ -->
+<div class="twopc-panel" id="twopc-panel">
+  <div class="twopc-title">🔐 Two-Phase Commit Protocol</div>
+  <div class="twopc-subtitle" id="twopc-subtitle">Coordinating distributed transaction...</div>
+
+  <div class="twopc-diagram" id="twopc-diagram">
+    <!-- Nodes rendered dynamically -->
+  </div>
+
+  <div class="twopc-steps" id="twopc-steps">
+    <!-- Steps rendered dynamically -->
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SUCCESS OVERLAY
+══════════════════════════════════════════ -->
+<div class="success-overlay" id="success-overlay">
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Transaction Complete</div>
+    <div class="success-detail" id="success-detail">—</div>
+    <button class="btn-primary" onclick="closeSuccess()" style="max-width:200px">Back to Home</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+// ─── CONFIG ─────────────────────────────────────────────
+const BANK_PORTS = { SBI: 5001, HDFC: 5002, JPMC: 6001, BOA: 6002 };
+const BANK_COUNTRY = { SBI: 'India', HDFC: 'India', JPMC: 'USA', BOA: 'USA' };
+const COUNTRY_PORTS = { India: 5000, USA: 6000 };
+const WORLD_PORT = 4000;
+const BASE = (port) => `/proxy/${port}`;
+
+// ─── STATE ─────────────────────────────────────────────
+let session = {
+  bank: null, bankPort: null,
+  accountId: null, cardNumber: null,
+  customerName: null
+};
+
+let selectedBank = null;
+let cardLookupTimer = null;
+
+// ─── AUTH TAB SWITCH ────────────────────────────────────
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', (tab==='login' ? i===0 : i===1)));
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('signup-form').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('auth-error').style.display = 'none';
+}
+
+async function selectBank(btn) {
+  document.querySelectorAll('.bank-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedBank = { name: btn.dataset.bank, port: parseInt(btn.dataset.port) };
+
+  // Fetch Supabase config for this bank from Flask /bank_config/<bank>
+  const infoEl = document.getElementById('bank-db-info');
+  if (!infoEl) return;
+  infoEl.innerHTML = '<div style="color:var(--white-dim);font-size:.75rem;padding:.3rem">Loading database info…</div>';
+  infoEl.style.display = 'block';
+
+  try {
+    const r    = await fetch(`/bank_config/${btn.dataset.bank}`);
+    const data = await r.json();
+    if (data.status === 'OK') {
+      infoEl.innerHTML = `
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
+          <span style="font-size:.78rem;color:var(--gold)">🗄 Supabase Database</span>
+          <span style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--green);
+            background:rgba(46,204,136,.12);border:1px solid rgba(46,204,136,.25);
+            border-radius:4px;padding:.1rem .4rem">CONNECTED</span>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:.71rem;color:var(--white-dim);line-height:2">
+          <span style="opacity:.55">host&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:var(--white)">${data.host}</span><br>
+          <span style="opacity:.55">database</span><span style="color:var(--white)"> ${data.database}</span><br>
+          <span style="opacity:.55">user&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:var(--white)"> ${data.user}</span><br>
+          <span style="opacity:.55">password</span><span style="color:var(--white);letter-spacing:.2em"> ••••••••••••</span>
+        </div>`;
+      serverLog(`Bank selected: ${btn.dataset.bank} · DB: ${data.host}`, 'info');
+    } else {
+      infoEl.innerHTML = `<div style="color:var(--gold);font-size:.75rem">${data.reason || 'Config not available'}</div>`;
+    }
+  } catch(e) {
+    infoEl.innerHTML = `<div style="color:var(--white-dim);font-size:.75rem">DB config unavailable: ${e.message}</div>`;
+    serverLog(`Could not load DB config for ${btn.dataset.bank}: ${e.message}`, 'warn');
+  }
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+// ─── LOGIN ───────────────────────────────────────────────
+async function doLogin() {
+  const card = document.getElementById('login-card').value.trim();
+  const pin = document.getElementById('login-pin').value.trim();
+  if (!card || !pin) { showAuthError('Please fill all fields'); return; }
+  if (card.length !== 12) { showAuthError('Card number must be 12 characters'); return; }
+
+  const bank = detectBankFromCard(card);
+  if (!bank) { showAuthError('Cannot detect bank from card number'); return; }
+
+  const btn = document.getElementById('login-btn');
+  btn.innerHTML = '<span class="spinner"></span> Signing in...'; btn.disabled = true;
+
+  serverLog(`Attempting login for card: ${card} → Bank: ${bank}`, 'info');
+
+  try {
+    const resp = await fetch(`${BASE(BANK_PORTS[bank])}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ card_number: card, pin })
+    });
+    const data = await resp.json();
+
+    if (data.status === 'SUCCESS') {
+      session = {
+        bank, bankPort: BANK_PORTS[bank],
+        accountId: data.account_id,
+        cardNumber: card,
+        customerName: data.customer_name
+      };
+      serverLog(`Login SUCCESS: ${data.customer_name} (${bank})`, 'success');
+      showHomeScreen();
+    } else {
+      showAuthError(data.reason || 'Login failed');
+      serverLog(`Login FAILED: ${data.reason}`, 'error');
+    }
+  } catch (e) {
+    showAuthError(`Cannot reach ${bank} server (port ${BANK_PORTS[bank]}). Is it running?`);
+    serverLog(`Login error: ${e.message}`, 'error');
+  }
+
+  btn.innerHTML = 'Sign In to Your Account'; btn.disabled = false;
+}
+
+// ─── SIGNUP ──────────────────────────────────────────────
+async function doSignup() {
+  const name = document.getElementById('signup-name').value.trim();
+  const pin = document.getElementById('signup-pin').value.trim();
+  const pin2 = document.getElementById('signup-pin2').value.trim();
+
+  if (!selectedBank) { showAuthError('Please select a bank'); return; }
+  if (!name) { showAuthError('Please enter your name'); return; }
+  if (!pin || pin.length < 4) { showAuthError('PIN must be at least 4 characters'); return; }
+  if (pin !== pin2) { showAuthError('PINs do not match'); return; }
+
+  const btn = document.getElementById('signup-btn');
+  btn.innerHTML = '<span class="spinner"></span> Creating account...'; btn.disabled = true;
+
+  serverLog(`Signup: ${name} at ${selectedBank.name} (port ${selectedBank.port})`, 'info');
+
+  try {
+    const resp = await fetch(`${BASE(selectedBank.port)}/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customer_name: name, pin })
+    });
+    const data = await resp.json();
+
+    if (data.status === 'SUCCESS') {
+      serverLog(`Account created! Card: ${data.card_number}`, 'success');
+      // Show card info then switch to login
+      showAuthError(''); // clear error
+      const errEl = document.getElementById('auth-error');
+      errEl.style.display = 'block';
+      errEl.style.background = 'rgba(46,204,136,0.15)';
+      errEl.style.borderColor = 'rgba(46,204,136,0.3)';
+      errEl.style.color = '#7FFFD4';
+      errEl.innerHTML = `
+        ✅ Account created!<br>
+        <span style="font-family:'DM Mono',monospace;font-size:0.9rem">${data.card_number}</span><br>
+        <small>Save your card number! Use it to log in.</small>
+      `;
+      // Pre-fill login
+      setTimeout(() => {
+        switchAuthTab('login');
+        document.getElementById('login-card').value = data.card_number;
+        document.getElementById('auth-error').style.display = 'none';
+      }, 3000);
+    } else {
+      showAuthError(data.reason || 'Signup failed');
+      serverLog(`Signup failed: ${data.reason}`, 'error');
+    }
+  } catch (e) {
+    showAuthError(`Cannot reach ${selectedBank.name} server. Is it running?`);
+    serverLog(`Signup error: ${e.message}`, 'error');
+  }
+
+  btn.innerHTML = 'Create Account'; btn.disabled = false;
+}
+
+// ─── DETECT BANK FROM CARD ──────────────────────────────
+function detectBankFromCard(card) {
+  if (card.length !== 12) return null;
+  const portStr = card.substring(4, 8);
+  const map = { '5001': 'SBI', '5002': 'HDFC', '6001': 'JPMC', '6002': 'BOA' };
+  return map[portStr] || null;
+}
+
+function formatCard(card) {
+  if (card.length !== 12) return card;
+  return `${card.slice(0,4)} ${card.slice(4,8)} ${card.slice(8,12)}`;
+}
+
+// ─── SHOW HOME ───────────────────────────────────────────
+function showHomeScreen() {
+  document.getElementById('auth-screen').classList.remove('active');
+  document.getElementById('home-screen').classList.add('active');
+
+  document.getElementById('nav-bank-name').textContent = session.bank;
+  document.getElementById('nav-bank-badge').textContent = session.bank;
+  document.getElementById('welcome-name').textContent = session.customerName;
+
+  // Account panel
+  document.getElementById('mini-bank-logo').textContent = session.bank;
+  document.getElementById('mini-card-number').textContent = formatCard(session.cardNumber);
+  document.getElementById('mini-card-name').textContent = session.customerName;
+  document.getElementById('info-account-id').textContent = session.accountId;
+  document.getElementById('info-bank').textContent = `${session.bank} (${BANK_COUNTRY[session.bank]})`;
+
+  loadSystemStatus();
+  serverLog(`Welcome ${session.customerName}! Connected to ${session.bank}`, 'success');
+}
+
+function doLogout() {
+  session = {};
+  document.getElementById('home-screen').classList.remove('active');
+  document.getElementById('auth-screen').classList.add('active');
+  document.getElementById('login-card').value = '';
+  document.getElementById('login-pin').value = '';
+  closeAllDropdowns();
+}
+
+// ─── SYSTEM STATUS ───────────────────────────────────────
+async function loadSystemStatus() {
+  const container = document.getElementById('system-status');
+  container.innerHTML = '';
+
+  const servers = [
+    { label: 'World', port: 4000 },
+    { label: 'India', port: 5000 },
+    { label: 'USA', port: 6000 },
+    { label: 'SBI', port: 5001 },
+    { label: 'HDFC', port: 5002 },
+    { label: 'JPMC', port: 6001 },
+    { label: 'BOA', port: 6002 },
+  ];
+
+  for (const s of servers) {
+    const badge = document.createElement('div');
+    badge.style.cssText = 'display:flex;align-items:center;gap:0.5rem;background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:0.4rem 0.8rem;font-size:0.75rem;backdrop-filter:blur(10px)';
+    badge.innerHTML = `<span>${s.label}</span> <span class="status-badge off" id="status-${s.label}"><span class="status-dot"></span>CHECKING</span>`;
+    container.appendChild(badge);
+
+    fetch(`${BASE(s.port)}/health`, { signal: AbortSignal.timeout(2000) })
+      .then(r => r.json())
+      .then(d => {
+        if (d.status === 'ON') {
+          document.getElementById(`status-${s.label}`).className = 'status-badge on';
+          document.getElementById(`status-${s.label}`).innerHTML = '<span class="status-dot"></span>ONLINE';
+        }
+      })
+      .catch(() => {
+        document.getElementById(`status-${s.label}`).innerHTML = '<span class="status-dot"></span>OFFLINE';
+      });
+  }
+}
+
+// ─── MODALS ──────────────────────────────────────────────
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  closeAllDropdowns();
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+function openDepositModal() {
+  switchDepTab('add');
+  openModal('deposit-modal');
+}
+function closeAllDropdowns() {
+  document.querySelectorAll('.dropdown-panel').forEach(d => d.classList.remove('open'));
+}
+
+function toggleAccPanel() {
+  const p = document.getElementById('acc-panel');
+  const wasOpen = p.classList.contains('open');
+  closeAllDropdowns();
+  if (!wasOpen) { p.classList.add('open'); loadTxHistory(); }
+}
+function toggleTxPanel() {
+  const p = document.getElementById('tx-panel');
+  const wasOpen = p.classList.contains('open');
+  closeAllDropdowns();
+  if (!wasOpen) { p.classList.add('open'); loadTxHistory(); }
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.relative') && !e.target.closest('.dropdown-panel')) closeAllDropdowns();
+});
+
+function toggleServerPanel() {
+  document.getElementById('server-panel').classList.toggle('open');
+}
+
+// ─── DEPOSIT TABS ────────────────────────────────────────
+function switchDepTab(tab) {
+  document.getElementById('dep-add').style.display = tab === 'add' ? 'block' : 'none';
+  document.getElementById('dep-send').style.display = tab === 'send' ? 'block' : 'none';
+  document.getElementById('dep-tab-add').classList.toggle('selected', tab === 'add');
+  document.getElementById('dep-tab-send').classList.toggle('selected', tab === 'send');
+}
+
+// ─── CARD INPUT PREVIEW ──────────────────────────────────
+function onCardInput(input) {
+  const card = input.value.trim().toUpperCase();
+  input.value = card;
+  const preview = document.getElementById('card-preview');
+
+  if (card.length !== 12) {
+    preview.classList.remove('visible');
+    return;
+  }
+
+  const bank = detectBankFromCard(card);
+  if (!bank) {
+    preview.classList.add('visible');
+    preview.innerHTML = `<span class="notfound">⚠ Unknown bank port in card</span>`;
+    return;
+  }
+
+  preview.classList.add('visible');
+  preview.innerHTML = `🔍 Detected Bank: <strong style="color:var(--gold)">${bank}</strong> · Looking up...`;
+
+  clearTimeout(cardLookupTimer);
+  cardLookupTimer = setTimeout(() => lookupCard(card, bank, preview), 500);
+}
+
+async function lookupCard(card, bank, preview) {
+  try {
+    const resp = await fetch(`${BASE(session.bankPort)}/card_lookup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ card_number: card })
+    });
+    const data = await resp.json();
+
+    if (data.status === 'FOUND') {
+      preview.innerHTML = `✅ <span class="found">${data.customer_name}</span> · Bank: <strong style="color:var(--gold)">${bank}</strong>`;
+    } else if (data.status === 'NOT_FOUND') {
+      preview.innerHTML = `<span class="notfound">Card not found in ${bank}</span>`;
+    } else if (data.status === 'OFFLINE') {
+      preview.innerHTML = `<span style="color:var(--gold)">⚠ ${bank} bank offline, can still attempt transfer</span>`;
+    }
+  } catch (e) {
+    preview.innerHTML = `<span class="notfound">Cannot check card: ${e.message}</span>`;
+  }
+}
+
+// ─── BALANCE ─────────────────────────────────────────────
+async function doBalance() {
+  const pin = document.getElementById('bal-pin').value.trim();
+  if (!pin) { alert('Enter PIN'); return; }
+
+  serverLog(`Balance check for ${session.accountId}`, 'info');
+  const result = document.getElementById('bal-result');
+  result.style.display = 'none';
+
+  try {
+    const resp = await fetch(`${BASE(session.bankPort)}/balance`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ account_id: session.accountId, pin })
+    });
+    const data = await resp.json();
+
+    if (data.status === 'SUCCESS') {
+      result.style.display = 'block';
+      document.getElementById('bal-amount').textContent = `₹ ${parseFloat(data.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+      serverLog(`Balance retrieved: ${data.balance}`, 'success');
+    } else {
+      alert(data.reason || 'Failed to get balance');
+      serverLog(`Balance check failed: ${data.reason}`, 'error');
+    }
+  } catch (e) {
+    alert('Bank server unreachable');
+    serverLog(`Balance error: ${e.message}`, 'error');
+  }
+}
+
+// ─── WITHDRAW ────────────────────────────────────────────
+async function doWithdraw() {
+  const amount = parseFloat(document.getElementById('wit-amount').value);
+  const pin = document.getElementById('wit-pin').value.trim();
+
+  if (!amount || amount <= 0) { alert('Enter valid amount'); return; }
+  if (!pin) { alert('Enter PIN'); return; }
+
+  serverLog(`Withdraw ₹${amount} from ${session.accountId}`, 'info');
+  closeModal('withdraw-modal');
+  showTwoPC('withdraw', amount, session.bank, null);
+
+  try {
+    const resp = await fetch(`${BASE(session.bankPort)}/withdraw`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ account_id: session.accountId, amount, pin })
+    });
+    const data = await resp.json();
+
+    closeTwoPC();
+    if (data.status === 'SUCCESS') {
+      serverLog(`Withdraw SUCCESS: ₹${amount}`, 'success');
+      showSuccess(`₹${amount} withdrawn from your ${session.bank} account`);
+    } else {
+      alert(data.reason || 'Withdraw failed');
+      serverLog(`Withdraw FAILED: ${data.reason}`, 'error');
+    }
+  } catch (e) {
+    closeTwoPC();
+    alert('Error: ' + e.message);
+    serverLog(`Withdraw error: ${e.message}`, 'error');
+  }
+}
+
+// ─── DEPOSIT ─────────────────────────────────────────────
+async function doDeposit() {
+  const amount = parseFloat(document.getElementById('dep-amount').value);
+  const pin = document.getElementById('dep-pin').value.trim();
+
+  if (!amount || amount <= 0) { alert('Enter valid amount'); return; }
+  if (!pin) { alert('Enter PIN'); return; }
+
+  serverLog(`Deposit ₹${amount} to ${session.accountId}`, 'info');
+  closeModal('deposit-modal');
+  showTwoPC('deposit', amount, session.bank, null);
+
+  try {
+    const resp = await fetch(`${BASE(session.bankPort)}/deposit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ account_id: session.accountId, amount, pin })
+    });
+    const data = await resp.json();
+
+    closeTwoPC();
+    if (data.status === 'SUCCESS') {
+      serverLog(`Deposit SUCCESS: ₹${amount}`, 'success');
+      showSuccess(`₹${amount} deposited to your ${session.bank} account`);
+    } else {
+      alert(data.reason || 'Deposit failed');
+      serverLog(`Deposit FAILED: ${data.reason}`, 'error');
+    }
+  } catch (e) {
+    closeTwoPC();
+    alert('Error: ' + e.message);
+    serverLog(`Deposit error: ${e.message}`, 'error');
+  }
+}
+
+// ─── TRANSFER ────────────────────────────────────────────
+async function doTransfer() {
+  const receiverCard = document.getElementById('send-card').value.trim().toUpperCase();
+  const amount = parseFloat(document.getElementById('send-amount').value);
+  const pin = document.getElementById('send-pin').value.trim();
+
+  if (!receiverCard || receiverCard.length !== 12) { alert('Enter valid 12-char card number'); return; }
+  if (!amount || amount <= 0) { alert('Enter valid amount'); return; }
+  if (!pin) { alert('Enter PIN'); return; }
+  if (receiverCard === session.cardNumber) { alert('Cannot transfer to yourself'); return; }
+
+  const receiverBank = detectBankFromCard(receiverCard);
+  if (!receiverBank) { alert('Unknown bank in card number'); return; }
+
+  closeModal('deposit-modal');
+
+  // Determine route type
+  const isSameBank = receiverBank === session.bank;
+  const senderCountry = BANK_COUNTRY[session.bank];
+  const receiverCountry = BANK_COUNTRY[receiverBank];
+  const isSameCountry = senderCountry === receiverCountry;
+  const route = isSameBank ? 'SAME_BANK' : (isSameCountry ? 'SAME_COUNTRY' : 'CROSS_COUNTRY');
+
+  serverLog(`Transfer ₹${amount}: ${session.bank} → ${receiverBank} [${route}]`, 'info');
+
+  showTwoPC('transfer', amount, session.bank, receiverBank, route);
+
+  try {
+    const resp = await fetch(`${BASE(session.bankPort)}/transfer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sender_account_id: session.accountId,
+        receiver_card: receiverCard,
+        amount,
+        pin
+      })
+    });
+    const data = await resp.json();
+
+    closeTwoPC();
+    if (data.status === 'SUCCESS') {
+      serverLog(`Transfer SUCCESS [${data.route}]: ₹${amount} → ${receiverBank}`, 'success');
+      showSuccess(`₹${amount} sent to ${receiverBank} account\nRoute: ${data.route}`);
+    } else {
+      alert(data.reason || 'Transfer failed');
+      serverLog(`Transfer FAILED: ${data.reason}`, 'error');
+    }
+  } catch (e) {
+    closeTwoPC();
+    alert('Error: ' + e.message);
+    serverLog(`Transfer error: ${e.message}`, 'error');
+  }
+}
+
+// ─── TRANSACTION HISTORY ─────────────────────────────────
+async function loadTxHistory() {
+  const container = document.getElementById('tx-list');
+  container.innerHTML = '<div style="color:var(--white-dim);font-size:0.78rem">Loading...</div>';
+
+  try {
+    const resp = await fetch(`${BASE(session.bankPort)}/transactions/${session.accountId}`);
+    const data = await resp.json();
+    const txs = data.transactions || [];
+
+    if (!txs.length) {
+      container.innerHTML = '<div style="color:var(--white-dim);font-size:0.78rem">No transactions yet</div>';
+      return;
+    }
+
+    container.innerHTML = txs.slice(0, 8).map(tx => {
+      const isSender = tx.sender_account === session.accountId;
+      const sign = (tx.tx_type === 'DEPOSIT' || (!isSender && tx.tx_type === 'TRANSFER')) ? '+' : '-';
+      const color = sign === '+' ? 'var(--green)' : 'var(--red)';
+      const stateClass = tx.state === 'COMMITTED' ? 'state-committed' : tx.state === 'ABORTED' ? 'state-aborted' : 'state-prepared';
+      return `
+        <div class="tx-item">
+          <div style="display:flex;justify-content:space-between">
+            <span class="tx-type" style="color:var(--white-dim)">${tx.tx_type} · ${tx.role || ''}</span>
+            <span class="tx-amount" style="color:${color}">${sign}₹${tx.amount.toLocaleString()}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:0.2rem">
+            <span style="font-size:0.65rem;color:var(--white-dim);font-family:'DM Mono',monospace">${tx.tx_id}</span>
+            <span class="tx-state ${stateClass}">${tx.state}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  } catch (e) {
+    container.innerHTML = `<div style="color:var(--red);font-size:0.78rem">Error: ${e.message}</div>`;
+  }
+}
+
+// ─── 2PC VISUALIZATION ───────────────────────────────────
+let twoPcTimer = null;
+
+function showTwoPC(type, amount, senderBank, receiverBank, route) {
+  const panel = document.getElementById('twopc-panel');
+  panel.classList.add('open');
+
+  let nodes = [], steps = [], subtitle = '';
+
+  if (type === 'deposit' || type === 'withdraw') {
+    subtitle = type === 'deposit' ? `Depositing ₹${amount} to ${senderBank}` : `Withdrawing ₹${amount} from ${senderBank}`;
+    nodes = [
+      { id: 'client', icon: '💻', label: 'Client', status: 'REQUEST' },
+      { id: 'bank', icon: '🏦', label: senderBank, status: 'PROCESSING' }
+    ];
+    steps = [
+      { label: 'Client sends request', desc: `${type.toUpperCase()} ₹${amount}` },
+      { label: 'PIN verified', desc: 'bcrypt validation' },
+      { label: 'FIFO queue entry', desc: 'Transaction enqueued' },
+      { label: 'Balance updated', desc: 'Atomic DB operation' },
+      { label: 'COMMITTED', desc: 'Success' }
+    ];
+
+  } else if (route === 'SAME_BANK') {
+    subtitle = `Same-bank transfer ₹${amount} within ${senderBank}`;
+    nodes = [
+      { id: 'client', icon: '💻', label: 'Client', status: 'INIT' },
+      { id: 'bank', icon: '🏦', label: senderBank, status: '2PC' }
+    ];
+    steps = [
+      { label: 'INIT: Sender validated', desc: 'PIN + balance check' },
+      { label: 'PREPARE: Lock accounts', desc: 'Deadlock-free lock' },
+      { label: 'Debit sender', desc: `−₹${amount}` },
+      { label: 'Credit receiver', desc: `+₹${amount}` },
+      { label: 'COMMIT: Release locks', desc: 'Transaction complete' }
+    ];
+
+  } else if (route === 'SAME_COUNTRY') {
+    const sCountry = BANK_COUNTRY[senderBank];
+    subtitle = `Same-country transfer ₹${amount}: ${senderBank} → ${receiverBank} via ${sCountry} server`;
+    nodes = [
+      { id: 'sender', icon: '🏦', label: senderBank, status: 'SENDER' },
+      { id: 'country', icon: '🌏', label: sCountry, status: 'ROUTING' },
+      { id: 'receiver', icon: '🏛', label: receiverBank, status: 'RECEIVER' }
+    ];
+    steps = [
+      { label: 'INIT: Validate sender', desc: 'PIN + funds check' },
+      { label: 'Route via Country server', desc: `${sCountry} ACK` },
+      { label: 'PREPARE sender', desc: 'Debit + lock' },
+      { label: 'PREPARE receiver', desc: 'Reserve credit slot' },
+      { label: 'COMMIT both', desc: '2PC complete' }
+    ];
+
+  } else { // CROSS_COUNTRY
+    const sCountry = BANK_COUNTRY[senderBank];
+    const rCountry = BANK_COUNTRY[receiverBank];
+    subtitle = `International transfer ₹${amount}: ${senderBank} (${sCountry}) → ${receiverBank} (${rCountry})`;
+    nodes = [
+      { id: 'sender', icon: '🏦', label: senderBank, status: 'SENDER' },
+      { id: 'scountry', icon: '🌏', label: sCountry, status: 'ROUTE' },
+      { id: 'world', icon: '🌐', label: 'World', status: 'COORD' },
+      { id: 'rcountry', icon: '🗺', label: rCountry, status: 'VERIFY' },
+      { id: 'receiver', icon: '🏛', label: receiverBank, status: 'RECEIVER' }
+    ];
+    steps = [
+      { label: 'INIT: Sender validates', desc: 'PIN + balance' },
+      { label: 'Country routes to World', desc: `${sCountry} → World server` },
+      { label: 'World checks receiver', desc: `${rCountry} country + ${receiverBank} online?` },
+      { label: 'PREPARE sender', desc: 'Debit + lock' },
+      { label: 'PREPARE receiver', desc: 'Reserve + lock' },
+      { label: 'COMMIT both banks', desc: '2PC finalized' }
+    ];
+  }
+
+  document.getElementById('twopc-subtitle').textContent = subtitle;
+  renderTwoPCDiagram(nodes);
+  renderTwoPCSteps(steps);
+  animateTwoPC(nodes, steps);
+}
+
+function renderTwoPCDiagram(nodes) {
+  const container = document.getElementById('twopc-diagram');
+  container.innerHTML = '';
+
+  nodes.forEach((node, i) => {
+    const el = document.createElement('div');
+    el.className = 'twopc-node';
+    el.id = `tpc-node-${node.id}`;
+    el.innerHTML = `
+      <div class="node-icon">${node.icon}</div>
+      <div class="node-label">${node.label}</div>
+      <div class="node-status" id="tpc-status-${node.id}">${node.status}</div>
+    `;
+    container.appendChild(el);
+
+    if (i < nodes.length - 1) {
+      const arrow = document.createElement('div');
+      arrow.className = 'twopc-arrow';
+      arrow.innerHTML = `
+        <div class="arrow-line" id="tpc-arrow-${i}"></div>
+        <div class="arrow-label" id="tpc-arrow-label-${i}">—</div>
+      `;
+      container.appendChild(arrow);
+    }
+  });
+}
+
+function renderTwoPCSteps(steps) {
+  const container = document.getElementById('twopc-steps');
+  container.innerHTML = steps.map((s, i) => `
+    <div class="twopc-step" id="tpc-step-${i}">
+      <div class="step-num">${i+1}</div>
+      <div>
+        <div style="font-weight:500">${s.label}</div>
+        <div style="font-size:0.75rem;color:var(--white-dim);font-family:'DM Mono',monospace">${s.desc}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function animateTwoPC(nodes, steps) {
+  clearTimeout(twoPcTimer);
+  let delay = 0;
+
+  steps.forEach((step, i) => {
+    setTimeout(() => {
+      // Activate current step
+      document.querySelectorAll('.twopc-step').forEach((el, j) => {
+        if (j < i) { el.classList.remove('active'); el.classList.add('done'); }
+        else if (j === i) { el.classList.add('active'); el.classList.remove('done'); }
+        else { el.classList.remove('active','done'); }
+      });
+
+      // Light up nodes progressively
+      const nodeEl = document.getElementById(`tpc-node-${nodes[Math.min(i, nodes.length-1)].id}`);
+      if (nodeEl) nodeEl.classList.add('active');
+
+      // Light up arrows
+      const arrowEl = document.getElementById(`tpc-arrow-${Math.min(i, nodes.length-2)}`);
+      if (arrowEl) arrowEl.classList.add('active');
+
+      serverLog(`[2PC Step ${i+1}] ${step.label}: ${step.desc}`, 'step');
+    }, delay);
+
+    delay += 900;
+  });
+}
+
+function closeTwoPC() {
+  document.getElementById('twopc-panel').classList.remove('open');
+  // Mark all done
+  document.querySelectorAll('.twopc-node').forEach(n => { n.classList.remove('active'); n.classList.add('success'); });
+  document.querySelectorAll('.arrow-line').forEach(a => { a.classList.remove('active'); a.classList.add('success'); });
+  document.querySelectorAll('.twopc-step').forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
+}
+
+// ─── SUCCESS OVERLAY ─────────────────────────────────────
+function showSuccess(detail) {
+  document.getElementById('success-detail').textContent = detail;
+  document.getElementById('success-overlay').classList.add('open');
+  serverLog(`✅ Transaction complete: ${detail}`, 'success');
+}
+
+function closeSuccess() {
+  document.getElementById('success-overlay').classList.remove('open');
+  loadSystemStatus();
+}
+
+// ─── SERVER LOG ──────────────────────────────────────────
+function serverLog(msg, type = 'info') {
+  const container = document.getElementById('log-entries');
+  const entry = document.createElement('div');
+  entry.className = `log-entry ${type}`;
+  const now = new Date();
+  const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  entry.innerHTML = `<span class="log-time">${ts}</span>${msg}`;
+  container.insertBefore(entry, container.firstChild);
+
+  // Keep max 50 entries
+  while (container.children.length > 50) container.removeChild(container.lastChild);
+}
+
+// ─── KEYBOARD ────────────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('auth-screen').classList.contains('active')) {
+      if (document.getElementById('login-form').style.display !== 'none') doLogin();
+      else doSignup();
+    }
+  }
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+    document.getElementById('twopc-panel').classList.remove('open');
+    closeAllDropdowns();
+  }
+});
+</script>
+</body>
+</html>

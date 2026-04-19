@@ -1,0 +1,12 @@
+{
+  "bank": "BOA",
+  "port": 6002,
+  "supabase": {
+    "host": "db.zptaxtcbtnwgaxgrgaqv.supabase.co",
+    "port": 5432,
+    "database": "postgres",
+    "user": "postgres",
+    "password": "BOAusa@6002"
+  },
+  "inflight": []
+}

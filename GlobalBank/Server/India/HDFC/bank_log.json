@@ -1,0 +1,12 @@
+{
+  "bank": "HDFC",
+  "port": 5002,
+  "supabase": {
+    "host": "db.szahkqxwqihhlpinvggx.supabase.co",
+    "port": 5432,
+    "database": "postgres",
+    "user": "postgres",
+    "password": "HDFCindia@5002"
+  },
+  "inflight": []
+}

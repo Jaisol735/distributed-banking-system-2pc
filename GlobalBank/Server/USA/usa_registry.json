@@ -1,0 +1,15 @@
+{
+  "country": "USA",
+  "banks": {
+    "JPMC": {
+      "port": 6001,
+      "status": "ON",
+      "fail_count": 2
+    },
+    "BOA": {
+      "port": 6002,
+      "status": "OFF",
+      "fail_count": 3
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "bank": "JPMC",
+  "port": 6001,
+  "supabase": {
+    "host": "db.ryrmhhaqtciygkrkqras.supabase.co",
+    "port": 5432,
+    "database": "postgres",
+    "user": "postgres",
+    "password": "JPMCusa@6001"
+  },
+  "inflight": []
+}

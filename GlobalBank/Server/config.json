@@ -1,0 +1,18 @@
+{
+  "tailscale_ip": "100.101.102.103",
+
+  "_comment": "Set tailscale_ip to the Tailscale IP of PC-2 (the server machine).",
+  "_comment2": "All servers read this file. You only need to change it in ONE place.",
+  "_comment3": "Run: tailscale ip -4   on PC-2 to find your Tailscale IP.",
+
+  "ports": {
+    "world":  4000,
+    "india":  5000,
+    "usa":    6000,
+    "SBI":    5001,
+    "HDFC":   5002,
+    "JPMC":   6001,
+    "BOA":    6002,
+    "frontend": 8080
+  }
+}
